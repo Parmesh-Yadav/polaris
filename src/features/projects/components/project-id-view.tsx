@@ -7,6 +7,7 @@ import { FaGithub } from "react-icons/fa";
 import { Allotment } from "allotment";
 import "allotment/dist/style.css";
 import { FileExplorer } from "./file-explorer";
+import { EditorView } from "@/features/editor/components/editor-view";
 
 const MIN_SIDEBAR_WIDTH = 200;
 const MAX_SIDEBAR_WIDTH = 800;
@@ -83,9 +84,7 @@ export const ProjectIdView = ({
                             <FileExplorer projectId={projectId} />
                         </Allotment.Pane>
                         <Allotment.Pane>
-                            <p>
-                                Code Editor
-                            </p>
+                            <EditorView projectId={projectId} />
                         </Allotment.Pane>
                     </Allotment>
                 </div>
