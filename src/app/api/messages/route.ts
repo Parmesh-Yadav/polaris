@@ -12,11 +12,13 @@ const requestSchema = z.object({
 });
 
 export async function POST(req: Request) {
+  // authenticate user
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // validate request body
   const internalKey = process.env.CONVEX_INTERNAL_KEY;
   if (!internalKey) {
     return NextResponse.json(
@@ -25,9 +27,11 @@ export async function POST(req: Request) {
     );
   }
 
+  // parse and validate request body
   const body = await req.json();
   const { conversationId, message } = requestSchema.parse(body);
 
+  // get conversation to find projectId
   const conversation = await convex.query(api.system.getConversationById, {
     internalKey,
     conversationId: conversationId as Id<"conversations">,
@@ -39,8 +43,39 @@ export async function POST(req: Request) {
     );
   }
 
+  // for simplicity, we will cancel all processing messages in the same project when a new message is sent. This is to prevent multiple processing messages from piling up when user sends multiple messages in a short period of time.
   const projectId = conversation.projectId;
 
+  // find all processing messages in this project.
+  const processingMessage = await convex.query(
+    api.system.getProcessingMessages,
+    {
+      internalKey,
+      projectId,
+    },
+  );
+
+  if (processingMessage.length > 0) {
+    // cancel all processing messages.
+    const cancelledIds = await Promise.all(
+      processingMessage.map(async (msg) => {
+        await inngest.send({
+          name: "message/cancel",
+          data: {
+            messageId: msg._id,
+          },
+        });
+
+        await convex.mutation(api.system.updateMessageStatus, {
+          internalKey,
+          messageId: msg._id,
+          status: "cancelled",
+        });
+      }),
+    );
+  }
+
+  // create user message
   await convex.mutation(api.system.createMessage, {
     internalKey,
     conversationId: conversationId as Id<"conversations">,
@@ -49,8 +84,7 @@ export async function POST(req: Request) {
     content: message,
   });
 
-  // TODO: check for processing messages
-
+  // create assistant message with processing status
   const assistantMessageId = await convex.mutation(api.system.createMessage, {
     internalKey,
     conversationId: conversationId as Id<"conversations">,
@@ -60,13 +94,18 @@ export async function POST(req: Request) {
     status: "processing",
   });
 
+  // trigger inngest function to process this message
   const event = await inngest.send({
     name: "message/sent",
     data: {
       messageId: assistantMessageId,
+      conversationId,
+      projectId,
+      message,
     },
   });
 
+  // return response with event id and message id for frontend to track
   return NextResponse.json({
     success: true,
     eventId: event.ids[0],
