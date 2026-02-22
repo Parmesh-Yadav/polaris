@@ -11,6 +11,7 @@ import { useCreateProject } from "../hooks/use-projects";
 import { adjectives, animals, colors, uniqueNamesGenerator } from "unique-names-generator"
 import { useEffect, useState } from "react";
 import { ProjectsCommandDialogue } from "./projects-command-dialogue";
+import { ImportGithubDialogue } from "./import-github-dailogue";
 
 const font = Poppins({
     subsets: ["latin"],
@@ -21,6 +22,7 @@ export const ProjectsView = () => {
     const createProject = useCreateProject();
 
     const [commandDialogueOpen, setCommandDialogueOpen] = useState(false);
+    const [importGithubDialogueOpen, setImportGithubDialogueOpen] = useState(false);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -28,6 +30,10 @@ export const ProjectsView = () => {
                 if (e.key === 'k') {
                     e.preventDefault();
                     setCommandDialogueOpen(true);
+                }
+                if (e.key === 'i') {
+                    e.preventDefault();
+                    setImportGithubDialogueOpen(true);
                 }
             }
         }
@@ -44,6 +50,10 @@ export const ProjectsView = () => {
             <ProjectsCommandDialogue
                 open={commandDialogueOpen}
                 onOpenChange={setCommandDialogueOpen}
+            />
+            <ImportGithubDialogue
+                open={importGithubDialogueOpen}
+                onOpenChange={setImportGithubDialogueOpen}
             />
             <div className="min-h-screen bg-sidebar flex flex-col items-center justify-center p-6 md:p-16">
                 <div className="w-full max-w-sm mx-auto flex flex-col gap-4 items-center">
@@ -91,7 +101,7 @@ export const ProjectsView = () => {
                             </Button>
                             <Button
                                 variant="outline"
-                                onClick={() => { }}
+                                onClick={() => setImportGithubDialogueOpen(true)}
                                 className="h-full items-start justify-start p-4 bg-background border flex flex-col gap-6 rounded-none"
                             >
                                 <div className="flex items-center justify-between w-full">
