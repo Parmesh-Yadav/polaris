@@ -12,6 +12,13 @@ import { adjectives, animals, colors, uniqueNamesGenerator } from "unique-names-
 import { useEffect, useState } from "react";
 import { ProjectsCommandDialogue } from "./projects-command-dialogue";
 import { ImportGithubDialogue } from "./import-github-dailogue";
+import { NewProjectDialog } from "./new-project-dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const font = Poppins({
     subsets: ["latin"],
@@ -23,6 +30,7 @@ export const ProjectsView = () => {
 
     const [commandDialogueOpen, setCommandDialogueOpen] = useState(false);
     const [importGithubDialogueOpen, setImportGithubDialogueOpen] = useState(false);
+    const [newProjectDialogOpen, setNewProjectDialogOpen] = useState(false);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -34,6 +42,10 @@ export const ProjectsView = () => {
                 if (e.key === 'i') {
                     e.preventDefault();
                     setImportGithubDialogueOpen(true);
+                }
+                if (e.key === 'j') {
+                    e.preventDefault();
+                    setNewProjectDialogOpen(true);
                 }
             }
         }
@@ -55,6 +67,10 @@ export const ProjectsView = () => {
                 open={importGithubDialogueOpen}
                 onOpenChange={setImportGithubDialogueOpen}
             />
+            <NewProjectDialog
+                open={newProjectDialogOpen}
+                onOpenChange={setNewProjectDialogOpen}
+            />
             <div className="min-h-screen bg-sidebar flex flex-col items-center justify-center p-6 md:p-16">
                 <div className="w-full max-w-sm mx-auto flex flex-col gap-4 items-center">
                     <div className="flex justify-between gap-4 w-full items-center">
@@ -74,31 +90,50 @@ export const ProjectsView = () => {
                     </div>
                     <div className="flex flex-col gap-4 w-full">
                         <div className="grid grid-cols-2 gap-2">
-                            <Button
-                                variant="outline"
-                                onClick={() => {
-                                    createProject({
-                                        name: uniqueNamesGenerator({
-                                            dictionaries: [adjectives, colors, animals],
-                                            separator: "-",
-                                            style: "lowerCase"
-                                        }),
-                                    });
-                                }}
-                                className="h-full items-start justify-start p-4 bg-background border flex flex-col gap-6 rounded-none"
-                            >
-                                <div className="flex items-center justify-between w-full">
-                                    <SparkleIcon className="size-4" />
-                                    <Kbd className="bg-accent border">
-                                        cmd + j
-                                    </Kbd>
-                                </div>
-                                <div>
-                                    <span className="text-sm">
-                                        New
-                                    </span>
-                                </div>
-                            </Button>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className="h-full items-start justify-start p-4 bg-background border flex flex-col gap-6 rounded-none"
+                                    >
+                                        <div className="flex items-center justify-between w-full">
+                                            <SparkleIcon className="size-4" />
+                                            <Kbd className="bg-accent border">
+                                                cmd + j
+                                            </Kbd>
+                                        </div>
+                                        <div>
+                                            <span className="text-sm">
+                                                New
+                                            </span>
+                                        </div>
+                                    </Button>
+                                </DropdownMenuTrigger>
+
+                                <DropdownMenuContent align="start" className="w-48">
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            setNewProjectDialogOpen(true);
+                                        }}
+                                    >
+                                        ✨ Create with AI
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            createProject({
+                                                name: uniqueNamesGenerator({
+                                                    dictionaries: [adjectives, colors, animals],
+                                                    separator: "-",
+                                                    length: 3,
+                                                })
+                                            });
+                                        }}
+                                    >
+                                        📁 Blank Project
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                             <Button
                                 variant="outline"
                                 onClick={() => setImportGithubDialogueOpen(true)}

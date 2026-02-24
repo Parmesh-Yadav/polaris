@@ -50,6 +50,16 @@ export const ImportGithubDialogue = ({
             } catch (e) {
                 if (e instanceof HTTPError) {
                     const body = await e.response.json<{ error: string }>();
+                    if (body.error?.includes("Pro plan required")) {
+                        toast.error("Importing from GitHub requires a Pro plan. Please upgrade to Pro to use this feature.", {
+                            action: {
+                                label: "Upgrade",
+                                onClick: () => openUserProfile()
+                            }
+                        });
+                        onOpenChange(false);
+                        return;
+                    }
                     if (body?.error?.includes("GitHub token not found")) {
                         toast.error("You need to connect your Github account first.", {
                             action: {

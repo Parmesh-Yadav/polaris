@@ -158,3 +158,16 @@
 ::-webkit-scrollbar-thumb {
   @apply rounded-full bg-border border-[1px] border-transparent border-solid bg-clip-padding;
 }
+
+/* Covers all possible Shiki class names */
+.dark .shiki,
+.dark .shiki span,
+.dark pre.shiki,
+.dark [class*="shiki"],
+.dark [class*="shiki"] span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
